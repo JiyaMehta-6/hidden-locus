@@ -1,0 +1,14 @@
+# Pinned to the versions verified in the project virtual environment.
+# The project is managed with uv; install with:
+#   uv pip install --python .venv/Scripts/python.exe -r requirements.txt
+PySide6>=6.12.0
+pandas>=3.0.6
+numpy>=2.5.4
+scikit-learn>=1.9.1
+scipy>=1.18.1
+xgboost>=3.4.1
+matplotlib>=3.11.2
+joblib>=1.6.0
+biopython>=1.88
+pyarrow>=26.0.0
+pytest>=9.1.1

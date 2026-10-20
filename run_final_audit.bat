@@ -1,0 +1,2 @@
+@echo off
+.venv\Scripts\python.exe -u -c "from hidden_locus.core.pipeline import run_full_pipeline; from hidden_locus import config; r = run_full_pipeline(config.Settings()); print('DONE'); print('positives:', r.n_positives)" > data\logs\final_audit.log 2>&1

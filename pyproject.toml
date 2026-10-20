@@ -1,0 +1,30 @@
+[project]
+name = "hidden-locus"
+version = "0.1.0"
+description = "Local desktop research tool for ranking disease-associated non-coding variant-to-gene relationships (Crohn's disease / IBD scope)"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "PySide6>=6.8",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "scikit-learn>=1.5",
+    "scipy>=1.13",
+    "xgboost>=2.1",
+    "matplotlib>=3.9",
+    "joblib>=1.4",
+    "biopython>=1.84",
+    "pyarrow>=18",
+]
+
+[project.scripts]
+hidden-locus = "hidden_locus:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
