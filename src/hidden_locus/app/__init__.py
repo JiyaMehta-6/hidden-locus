@@ -16,9 +16,11 @@ def run() -> int:
 
     from .. import config
     from .main_window import MainWindow
+    from .theme import apply_theme
 
     config.ensure_data_dirs()
     app = QApplication(sys.argv)
+    apply_theme(app)
     app.setApplicationName(config.APP_NAME)
     app.setApplicationVersion(config.APP_VERSION)
     window = MainWindow()
