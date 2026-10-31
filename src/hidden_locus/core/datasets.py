@@ -235,25 +235,6 @@ DATASETS: tuple[DatasetSpec, ...] = (
         required=False,
     ),
     DatasetSpec(
-        key="abc_model",
-        name="ENCODE ABC Model enhancer-gene predictions (GRCh38)",
-        purpose=(
-            "Predicted enhancer-gene links from the Activity-By-Contact (ABC) "
-            "Model using chromatin accessibility, H3K27ac, and Hi-C contact maps. "
-            "Provides distal regulatory connections beyond linear distance."
-        ),
-        source="ENCODE Consortium / Kundaje Lab (ABC Model v1.1)",
-        license_note="ENCODE data use policy: free for unrestricted use",
-        approx_size="500 MB",
-        index_url=(
-            "https://storage.googleapis.com/encode-abc-model/"
-            "v1.1/predictions/"
-        ),
-        pattern=r'href="([^"]+\.bed\.gz)"',
-        assembly="GRCh38",
-        required=False,
-    ),
-    DatasetSpec(
         key="clinvar",
         name="ClinVar GRCh38 VCF",
         purpose=(

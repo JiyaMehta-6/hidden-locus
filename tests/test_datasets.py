@@ -6,6 +6,12 @@ from hidden_locus import config
 from hidden_locus.core import datasets as ds
 
 
+def test_dataset_keys_are_unique():
+    """Registry sanity: every dataset key appears exactly once."""
+    keys = [spec.key for spec in ds.DATASETS]
+    assert len(keys) == len(set(keys))
+
+
 def test_local_files_excludes_partial_downloads(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "DATASETS_DIR", tmp_path)
     spec = ds.DatasetSpec(
