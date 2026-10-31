@@ -25,6 +25,13 @@ dev = [
     "pytest>=8",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --durations=8"
+markers = [
+    "slow: long-running benchmark tests (deselect with '-m \"not slow\"')",
+]
+
 [build-system]
 requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"

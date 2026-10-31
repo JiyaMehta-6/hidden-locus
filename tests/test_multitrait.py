@@ -14,6 +14,7 @@ def test_traits_dict_nonempty():
     assert "ra" in TRAITS
 
 
+@pytest.mark.slow
 def test_run_multitrait_benchmark_smoke():
     """Smoke test with minimal settings — will use local datasets if present."""
     settings = config.Settings(

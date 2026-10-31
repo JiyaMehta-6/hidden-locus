@@ -58,6 +58,7 @@ def test_compare_baselines_table(ready_table):
     assert {"mean_roc_auc", "mean_average_precision"} <= set(table.columns)
 
 
+@pytest.mark.slow
 def test_feature_group_ablations(ready_table):
     table = feature_group_ablations(
         ready_table, model_name="logreg", n_splits=4,
@@ -68,6 +69,7 @@ def test_feature_group_ablations(ready_table):
     assert "minus_structural" in ablations
 
 
+@pytest.mark.slow
 def test_feature_group_ablations_reuses_full_result(ready_table):
     cv = grouped_cross_validate(ready_table, model_name="logreg", use_pu=False, n_splits=4)
     table = feature_group_ablations(
@@ -89,6 +91,7 @@ def test_compare_baselines_reports_n_scored(ready_table):
     assert list(table["model"]).count("logreg") == 1
 
 
+@pytest.mark.slow
 def test_compare_baselines_reports_pu_ablation_row(ready_table):
     cv = grouped_cross_validate(ready_table, model_name="logreg", use_pu=True, n_splits=4)
     table = compare_baselines(ready_table, cv, use_pu=True)
