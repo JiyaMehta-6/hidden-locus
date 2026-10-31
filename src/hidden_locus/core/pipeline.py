@@ -297,7 +297,7 @@ def _load_coloc(candidates: pd.DataFrame, report: ValidationReport) -> "pd.DataF
         )
         return None
     try:
-        frame = pd.read_csv(path)
+        frame = pd.read_csv(path, low_memory=False)
     except (OSError, ValueError) as exc:
         report.add("warning", "bad_coloc_cache", f"Could not read coloc cache: {exc}")
         return None
@@ -447,7 +447,7 @@ def _load_l2g(report: ValidationReport) -> "pd.DataFrame | None":
         )
         return None
     try:
-        frame = pd.read_csv(path)
+        frame = pd.read_csv(path, low_memory=False)
     except (OSError, ValueError) as exc:
         report.add("warning", "bad_l2g_file", f"Could not read L2G file: {exc}")
         return None

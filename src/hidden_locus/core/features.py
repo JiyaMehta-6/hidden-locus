@@ -682,20 +682,28 @@ def build_feature_table(
     if context.gut_atlas:
         df = merge_gut_atlas_with_candidates(df, context.gut_atlas, report=None)
     else:
-        # Add empty columns for all known cell types
+        # Build the placeholder columns as one block and attach them with a
+        # single concat: inserting ~80 columns one-by-one fragments the
+        # DataFrame and triggers pandas PerformanceWarning.
         all_cell_types = ["stem", "enterocyte", "goblet", "paneth", "tuft", "best4",
                           "cd4_t", "cd8_t", "treg", "b_cell", "plasma",
                           "macrophage", "dendritic", "mast", "ilc",
                           "fibroblast", "endothelial", "pericyte", "smooth_muscle"]
+        defaults: dict[str, float | int] = {}
         for ct in all_cell_types:
             sfx = ct.replace("+", "p").replace("-", "_")
-            df[f"gut_log10p_{sfx}"] = 0.0
-            df[f"gut_slope_{sfx}"] = 0.0
-            df[f"gut_pair_{sfx}"] = 0
-            df[f"gut_egene_{sfx}"] = 0.0
-        df["gut_n_celltypes"] = 0
-        df["gut_direction_conflict"] = 0
-        df["gut_missing"] = 1
+            defaults[f"gut_log10p_{sfx}"] = 0.0
+            defaults[f"gut_slope_{sfx}"] = 0.0
+            defaults[f"gut_pair_{sfx}"] = 0
+            defaults[f"gut_egene_{sfx}"] = 0.0
+        defaults["gut_n_celltypes"] = 0
+        defaults["gut_direction_conflict"] = 0
+        defaults["gut_missing"] = 1
+        df = pd.concat([df, pd.DataFrame(defaults, index=df.index)], axis=1)
+
+    # De-fragment once before the final column additions so the remaining
+    # single-column inserts do not raise pandas PerformanceWarning.
+    df = df.copy()
 
     # --- allele verification against GTEx reference alleles ------------------
     alleles = context.variant_alleles()

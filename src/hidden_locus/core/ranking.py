@@ -13,7 +13,6 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
 
 from .. import config
 from .features import assert_no_leakage, feature_columns, gtex_feature_columns
@@ -121,8 +120,11 @@ class PUBaggedClassifier:
 
 
 def _logreg_base(random_state: int):
+    # Features are unscaled and on very different ranges (distances, -log10
+    # p-values, binary flags), so lbfgs needs a generous iteration budget to
+    # converge; 2000 was not enough and raised ConvergenceWarning.
     return LogisticRegression(
-        max_iter=2000,
+        max_iter=5000,
         C=1.0,
         random_state=random_state,
     )
