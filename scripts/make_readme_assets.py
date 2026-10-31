@@ -55,10 +55,12 @@ def latest_report() -> Path:
 
 def gui_screenshots(report: Path) -> None:
     """Capture the application tabs with a saved report loaded."""
+    from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QApplication
 
     from hidden_locus import config
     from hidden_locus.app.main_window import MainWindow
+    from hidden_locus.app.theme import apply_theme
     from hidden_locus.core.pipeline import PipelineResult
     from hidden_locus.core.validation import ValidationReport
 
@@ -83,7 +85,11 @@ def gui_screenshots(report: Path) -> None:
 
     config.ensure_data_dirs()
     app = QApplication.instance() or QApplication(sys.argv)
+    apply_theme(app)
     window = MainWindow()
+    # Render offscreen: a real window is clamped to the desktop work area,
+    # which would shrink the captures on small displays.
+    window.setAttribute(Qt.WidgetAttribute.WA_DontShowOnScreen, True)
     window.resize(1500, 900)
     window.show()
     window._last_result = result

@@ -55,15 +55,17 @@ exists precisely because of this.
 
 ## Screenshots
 
-![Analysis tab: research scope and model settings](docs/images/gui_analysis.png)
+![Analysis tab: research scope, model settings and the run workflow](docs/images/gui_analysis.png)
 
-| Results — ranked candidates | Results — ROC by locus-grouped fold |
+| Results — ranked candidates | Data — opt-in dataset manager |
 |---|---|
-| ![Ranked candidates table with model scores](docs/images/gui_results_ranked.png) | ![ROC curves per cross-validation fold inside the app](docs/images/gui_results_roc.png) |
+| ![Ranked candidates table with model scores](docs/images/gui_results_ranked.png) | ![Dataset status table with present and missing entries](docs/images/gui_data.png) |
+
+![ROC curves per locus-grouped fold inside the app](docs/images/gui_results_roc.png)
 
 *(Captured offline from a saved reference report with
-`scripts/make_readme_assets.py`; the Data tab manages the opt-in dataset
-downloads.)*
+`scripts/make_readme_assets.py`; the app ships its own dark theme, so the
+captures do not depend on the operating-system palette.)*
 
 ---
 
