@@ -769,11 +769,19 @@ class ValidationPanel(QWidget):
 
     def show_report(self, report) -> None:
         self.issues.setRowCount(len(report.issues))
+        colors = {
+            "error": "#ff6b81",
+            "warning": theme.WARN,
+            "info": theme.MUTED,
+        }
         for row, issue in enumerate(report.issues):
             for col, text in enumerate(
                 [issue.level, issue.code, issue.where, issue.message]
             ):
-                self.issues.setItem(row, col, QTableWidgetItem(text))
+                item = QTableWidgetItem(text)
+                if col == 0:
+                    item.setForeground(QColor(colors.get(issue.level, theme.TEXT)))
+                self.issues.setItem(row, col, item)
 
 
 class MainWindow(QMainWindow):
