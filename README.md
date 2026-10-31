@@ -7,6 +7,10 @@ machine learning and leakage-aware evaluation.
 **Default research scope:** Crohn's disease / inflammatory bowel disease
 (IBD) on **GRCh38**.
 
+[![tests](https://github.com/JiyaMehta-6/hidden-locus/actions/workflows/tests.yml/badge.svg)](https://github.com/JiyaMehta-6/hidden-locus/actions/workflows/tests.yml)
+[![python](https://img.shields.io/badge/python-3.14%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![license](https://img.shields.io/badge/license-GPL--3.0-2ea44f.svg)](LICENSE)
+
 > **Research use only.** Hidden Locus produces ranked hypotheses for research
 > prioritisation. It makes no clinical claims, provides no diagnostic or
 > treatment guidance, and its scores must not be used for medical decisions.
@@ -49,6 +53,20 @@ exists precisely because of this.
 
 ---
 
+## Screenshots
+
+![Analysis tab: research scope and model settings](docs/images/gui_analysis.png)
+
+| Results — ranked candidates | Results — ROC by locus-grouped fold |
+|---|---|
+| ![Ranked candidates table with model scores](docs/images/gui_results_ranked.png) | ![ROC curves per cross-validation fold inside the app](docs/images/gui_results_roc.png) |
+
+*(Captured offline from a saved reference report with
+`scripts/make_readme_assets.py`; the Data tab manages the opt-in dataset
+downloads.)*
+
+---
+
 ## Install
 
 Requirements: Python ≥ 3.14 with a virtual environment (this repository was
@@ -57,6 +75,13 @@ developed against an existing uv-managed `.venv`).
 ```powershell
 # from the project root
 uv pip install --python .venv/Scripts/python.exe -r requirements.txt
+```
+
+Or with plain `pip` in any Python ≥ 3.14 environment:
+
+```powershell
+python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
 
 Run the desktop application:
@@ -70,7 +95,8 @@ Run the desktop application:
 Run the tests:
 
 ```powershell
-.venv\Scripts\python.exe -m pytest tests -q
+.venv\Scripts\python.exe -m pytest -q               # full suite (106 tests)
+.venv\Scripts\python.exe -m pytest -q -m "not slow" # fast subset (~1 min)
 ```
 
 ---
@@ -97,6 +123,8 @@ application, or the CLI:
 | `label_eqtl_permuted` | BLUEPRINT permutation results | 0.6 MB | eGene filter for labels |
 | `opentargets_l2g` | Open Targets L2G scores (optional) | ~70 MB | external comparator |
 | `opentargets_credible_set` | Open Targets GWAS credible sets (optional) | ~2.5 GB | fine-mapping PIPs, L2G joins |
+| `abc_model` | ENCODE ABC Model enhancer–gene predictions (optional) | ~500 MB | distal regulatory links |
+| `gut_cell_atlas_eqtl` | Gut Cell Atlas cell-type-specific eQTL (optional) | ~2 GB | cell-type eQTL features |
 | `clinvar` | ClinVar GRCh38 VCF (optional) | ~200 MB | variant context |
 
 Every downloaded file is recorded in `data/manifest.json` with source URL,
@@ -136,6 +164,57 @@ gencodegenes.org; Open Targets Platform outputs — CC0.
 
 ---
 
+## Results (reference run)
+
+Figures and numbers below come from the saved reference report
+`data/reports/20261016_174459`: IBD scope, GRCh38, **49,110 candidate
+pairs**, 5-fold locus-grouped CV, seed 42.
+
+![ROC curves by locus-grouped fold](docs/images/roc_curves.png)
+
+| Model | ROC AUC | Avg. precision |
+|---|---|---|
+| Logistic regression + PU bagging | **0.927 ± 0.024** | 0.316 |
+| Logistic regression | 0.923 ± 0.027 | 0.331 |
+| XGBoost + PU bagging | 0.916 ± 0.019 | 0.277 |
+| XGBoost | 0.911 ± 0.020 | 0.282 |
+| Nearest-gene baseline | 0.599 | 0.035 |
+
+Positive labels come only from the BLUEPRINT monocyte eQTL study (never
+from GTEx, which is feature-only). Open Targets L2G scores are exported
+separately in `external_benchmark.csv` as an external comparator — a
+different task definition, never a training signal.
+
+**Feature-group ablations** (XGBoost, 5-fold) — which evidence actually
+carries the ranking:
+
+| Feature group removed | ROC AUC | Δ vs full |
+|---|---|---|
+| *full model* | 0.916 | — |
+| – GTEx tissue eQTL | 0.852 | −0.064 |
+| – structural (distance to TSS) | 0.859 | −0.057 |
+| – colocalisation | 0.896 | −0.020 |
+| – cCRE overlap | 0.916 | −0.001 |
+| – consequence class | 0.916 | ±0.000 |
+| – fine-mapping PIPs | 0.919 | +0.002 |
+
+![Global feature importance (gain)](docs/images/feature_importance.png)
+
+**Generalisation across traits** — the same pipeline retrained per trait
+(`data/reports/multitrait_benchmark.csv`):
+
+![Multi-trait benchmark vs nearest-gene baseline](docs/images/multitrait_benchmark.png)
+
+**Independent enrichment check** — top-ranked genes against curated IBD
+genes: **16.3× enrichment at the top 100** (Fisher p = 2.2 × 10⁻⁸) and
+**11.4× at the top 250** (p = 5.0 × 10⁻¹²).
+
+Reproduce by fetching the datasets above and pressing *Run analysis*;
+`scripts/make_readme_assets.py` regenerates these images offline from a
+saved report.
+
+---
+
 ## Evaluation design (anti-leakage rules)
 
 - Splits are **grouped by locus** (`GroupKFold` on `locus_id`); a genomic
@@ -164,13 +243,16 @@ unlabelled is unlabelled. Treat results as prioritisation for follow-up
 ## Tests
 
 ```powershell
-.venv\Scripts\python.exe -m pytest tests -q
+.venv\Scripts\python.exe -m pytest -q               # full suite (106 tests)
+.venv\Scripts\python.exe -m pytest -q -m "not slow" # fast subset (~1 min)
 ```
 
 The suite covers interval math, allele harmonisation, GWAS locus
 construction, feature building, leakage guards, PU training, grouped
 evaluation, baselines and explainability — all on synthetic data (no
-network access).
+network access). The four long-running benchmark tests carry the `slow`
+marker; the rest finish in about a minute. Continuous integration runs
+the full suite on every push (`.github/workflows/tests.yml`).
 
 ---
 
@@ -221,3 +303,11 @@ Public data resources (accessed via the Data tab):
 - Open Targets Platform — https://platform.opentargets.org/
 
 No other external tools are required, and no paid APIs or accounts are used.
+
+---
+
+## License
+
+This project is released under the [GNU General Public License v3.0](LICENSE).
+The datasets above remain under their own terms (see *Licence notes* in
+the Data section).
